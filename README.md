@@ -18,7 +18,7 @@ Clone the source, build, and then symlink the required dependencies into your Ri
 git clone https://github.com/krestenkrab/riak_webhook.git
 cd riak_webhook
 ./rebar get-deps
-make
+./rebar compile
 [...wait for a long time while spidermonkey builds...]
 cd $RIAK_LIBS
 ln -s $BUILD_DIR riak_webhook-0.0.1
