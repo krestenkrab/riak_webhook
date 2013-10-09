@@ -1,0 +1,12 @@
+{application, riak_webhook,
+ [
+  {description, ""},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { riak_webhook_app, []}},
+  {env, [ {url, "http://localhost:4444/update"} ]}
+ ]}.
