@@ -4,9 +4,9 @@ This is a postcommit hook that POST's newly written riak objects to a remote HTT
 
 You set this module/function as your postcommit hook using whatever tools you're used to.   For instance, to install the postcommit hook in the `test` bucket, you can do:
 
-````
+````sh
 curl -v -X PUT -H "Content-Type: application/json" \
-     -d '{ "props":{ "postcommit" :[{"mod":"riak_webhook","fun":"postcommit"}],
+     -d '{ "props":{ "postcommit"  : [{"mod":"riak_webhook","fun":"postcommit"}],
                      "webhook_url" : "http://localhost:4444/update",
                      "webhook_sendbody" : "false" }}' \
      http://127.0.0.1:8098/riak/test
@@ -23,7 +23,7 @@ The first time you configure bucket properties, you might have to go into the ri
 
 Clone the source, build, and then symlink the required dependencies into your Riak install:
 
-````
+````sh
 git clone https://github.com/krestenkrab/riak_webhook.git
 cd riak_webhook
 ./rebar get-deps
@@ -50,7 +50,7 @@ The meaning of these properties can be found [here](http://erlang.org/doc/man/ht
 
 The value being posted is the same as you would have seen in a JavaScript hook or map/reduce setting.  The value is always posted with content-type `application/json; charset=utf-8`.  For instance:
 
-````
+````sh
 curl -v -H 'Content-Type: application/json' \
     -X PUT -d '{ "foo" : "bar" }' \
     -H 'x-riak-index-email_bin: krab@trifork.com' \
@@ -76,7 +76,7 @@ Could result in the following JSON being POST'ed:
         "X-Riak-Last-Modified": "Thu, 10 Oct 2013 09:59:20 GMT",
         "X-Riak-Meta": {}
       }
-      "data": " ... data as string here - if webhook_sendbody is true ... "      
+      "data": "{ \"foo\" : \"bar\" }"      
     },
     // any siblings here
   ]
