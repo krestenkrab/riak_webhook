@@ -11,7 +11,8 @@
   {env, [
          {max_sessions, 10},
          {max_keep_alive_length, 10},
-         {pipeline_timeout, 120000},
+         {keep_alive_timeout, 10000},
+         {pipeline_timeout, 10000},
          {max_pipeline_length, 10}
         ]}
  ]}.

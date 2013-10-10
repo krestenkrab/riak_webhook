@@ -51,21 +51,27 @@ The meaning of these properties can be found [here](http://erlang.org/doc/man/ht
 The value being posted is the same as you would have seen in a JavaScript hook or map/reduce setting.  The value is always posted with content-type `application/json; charset=utf-8`.  For instance:
 
 ````javascript
-{  
-    "bucket" : "somebucket",
-    "key"    : "mykey",
-    "vclock" : VclockAsString,
-    "values" : [
-        {  
-            "metadata":{
-                        "content-type": "text/plain"
-                        "X-Riak-VTag" : VtagAsString,
-                        ...other metadata...
-                       },
-            "data" : " .. data as string here .." 
+{
+  "bucket": "test",
+  "key": "foo",
+  "vclock": "a85hYGBgzGDKBVIcypz/fgYF5eRnMCXy5bEyVHw7dZovCwA=",
+  "values": [
+    {
+      "metadata": {
+        "Links": [],
+        "X-Riak-VTag": "44srWHnt3975dLgx2LHucT",
+        "content-type": "application/json",
+        "index": {
+          "email_bin": "jsmith@basho.com"
         },
-        // any siblings here
-    ]
+        "X-Riak-Last-Modified": "Thu, 10 Oct 2013 09:59:20 GMT",
+        "X-Riak-Meta": {}
+      }
+      "data": " ... data as string here - if webhook_sendbody is true ... "      
+    },
+    // any siblings here
+  ]
+}
 ````
 
 Only you set the *bucket* property `webhook_sendbody` to true will the `data` element be included.   You'll notice that even if the content type is `application/json`, the value held in `data` will be the string representation of the JSON object.
