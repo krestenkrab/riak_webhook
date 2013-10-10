@@ -74,6 +74,6 @@ The value being posted is the same as you would have seen in a JavaScript hook o
 }
 ````
 
-Only you set the *bucket* property `webhook_sendbody` to true will the `data` element be included.   You'll notice that even if the content type is `application/json`, the value held in `data` will be the string representation of the JSON object.
+Only if you set the *bucket* property `webhook_sendbody` to true will the `data` element be included.   You'll notice that even if the content type is `application/json`, the value held in `data` will be the string representation of the JSON object.
 
 
