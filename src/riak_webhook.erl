@@ -52,8 +52,8 @@ postcommit(RObj) ->
 start_httpc_profile() ->
 
     %% make sure to intern the atoms used by the bucket properties
-    erlang:binary_to_atom(<<"webhook_url">>, latin1),
-    erlang:binary_to_atom(<<"webhook_sendbody">>, latin1),
+    _ = erlang:binary_to_atom(<<"webhook_url">>, latin1),
+    _ = erlang:binary_to_atom(<<"webhook_sendbody">>, latin1),
 
     %% start a HTTP client profile for the app (stand_alone will make it
     %% be linked to this process (the supervisor).
