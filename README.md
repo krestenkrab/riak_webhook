@@ -5,10 +5,10 @@ This is a postcommit hook that POST's newly written riak objects to a remote HTT
 You set this module/function as your postcommit hook using whatever tools you're used to.   For instance, to install the postcommit hook in the `test` bucket, you can do:
 
 ````
-> curl -v -X PUT -H "Content-Type: application/json"
+curl -v -X PUT -H "Content-Type: application/json" \
      -d '{ "props":{ "postcommit" :[{"mod":"riak_webhook","fun":"postcommit"}],
                      "webhook_url" : "http://localhost:4444/update",
-                     "webhook_sendbody" : "false" }}'
+                     "webhook_sendbody" : "false" }}' \
      http://127.0.0.1:8098/riak/test
 ````
 
