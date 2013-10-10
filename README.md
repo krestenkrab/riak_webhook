@@ -7,14 +7,17 @@ You set this module/function as your postcommit hook using whatever tools you're
 ````
 > curl -v -X PUT -H "Content-Type: application/json"
      -d '{ "props":{ "postcommit" :[{"mod":"riak_webhook","fun":"postcommit"}],
-                             "webhook_url" : "http://localhost:4444/update",
-                             "webhook_sendbody" : "false" }}'
+                     "webhook_url" : "http://localhost:4444/update",
+                     "webhook_sendbody" : "false" }}'
      http://127.0.0.1:8098/riak/test
 ````
 
 The bucket property `webhook_url` configures where to send the request,
 and `webhook_sendbody` controls if the body (the data of the stored object) should
 be included in the POST body.
+
+The first time you configure bucket properties, you might have to go into the riak console (e.g. by attaching to a riak node), and run `riak_webhook:start()` before doing the above curl post, which makes sure that it accepts the configuration names.
+
 
 ## Installation
 
@@ -45,7 +48,7 @@ You can configure the application `etc/app.config` to contain a section like thi
 
 The meaning of these properties can be found [here](http://erlang.org/doc/man/httpc.html#set_options-2), but the default configuration allows up to 10 concurrent persistent sockets, each having a maximum of 10 outstanding pipelined HTTP requests.
 
-The value being posted is the same as you would have seen in a JavaScript hook or map/reduce setting.  The value is always posted with content-type `application/json`.  For instance:
+The value being posted is the same as you would have seen in a JavaScript hook or map/reduce setting.  The value is always posted with content-type `application/json; charset=utf-8`.  For instance:
 
 ````javascript
 {  
@@ -66,3 +69,5 @@ The value being posted is the same as you would have seen in a JavaScript hook o
 ````
 
 Only you set the *bucket* property `webhook_sendbody` to true will the `data` element be included.   You'll notice that even if the content type is `application/json`, the value held in `data` will be the string representation of the JSON object.
+
+
