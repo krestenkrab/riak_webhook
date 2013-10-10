@@ -1,6 +1,13 @@
 -module(riak_webhook).
 
--export([postcommit/1, start_httpc_profile/0]).
+-export([postcommit/1,
+
+         %% utility to start/stop the webhook app
+         start/0, stop/0,
+
+         %% internal API used by the supervisor
+         start_httpc_profile/0
+]).
 
 postcommit(RObj) ->
 
@@ -8,39 +15,77 @@ postcommit(RObj) ->
         ok -> ok; {error,{already_started,_}} -> ok
     end,
 
-    {ok, URL} = get_url(riak_object:bucket(RObj)),
+    {ok, C} = riak:local_client(),
+    Props = C:get_bucket(riak_object:bucket(RObj)),
+
+    case proplists:get_value(webhook_url, Props) of
+        %% fails if there is no url property
+        URL when is_list(URL) -> ok
+    end,
 
     Headers = [],
 
     Struct = riak_object_json:encode(RObj),
-    JSONData = mochijson2:encode(Struct),
 
-    {ok, _} = httpc:request(post, {URL, Headers, "application/json", erlang:iolist_to_binary(JSONData)}, [], [], ?MODULE ),
+    UseStruct =
+        case proplists:get_value(webhook_sendbody, Props) of
+            true ->
+                Struct;
+            <<"true">> ->
+                Struct;
+            _ ->
+                {struct, StructMembers} = Struct,
+                Siblings = proplists:get_value(<<"values">>, StructMembers, []),
+                NewSiblings = [ {struct, proplists:delete(<<"data">>, SiblingMembers) }
+                                || {struct, SiblingMembers} <- Siblings ],
+                {struct, proplists:delete(<<"values">>, StructMembers) ++ NewSiblings}
+        end,
+
+    Encoder  = mochijson2:encoder([{utf8, true}]),
+    JSONData = Encoder(UseStruct),
+
+    {ok, _} = httpc:request(post, {URL, Headers, "application/json; charset=utf-8", JSONData}, [], [], ?MODULE ),
 
     ok.
 
 
-get_url(_Bucket) ->
-    application:get_env(?MODULE, url).
-
-
 start_httpc_profile() ->
+
+    %% make sure to intern the atoms used by the bucket properties
+    erlang:binary_to_atom(<<"webhook_url">>),
+    erlang:binary_to_atom(<<"webhook_sendbody">>),
+
+    %% start a HTTP client profile for the app (stand_alone will make it
+    %% be linked to this process (the supervisor).
     ServiceConfig = [{profile, ?MODULE}],
     {ok, PID} = inets:start(httpc, ServiceConfig, stand_alone),
 
-    %% configure the client to have up to 10 concurrenct sockets
-    %% using both keep-alive and pipelining
+    %% configure the client profile
+
+    MaxSessions = application:get_env(?MODULE, max_sessions, 10),
+    MaxKeepAlive = application:get_env(?MODULE, max_keep_alive_length, 10),
+    PipleLineTimeout = application:get_env(?MODULE, pipeline_timeout, 120000),
+    MaxPipelineLength = application:get_env(?MODULE, max_pipeline_length, 10),
 
     HTTPClientOptions =
         [
-         {max_sessions, 10},
-         {max_keep_alive_length, 10},
-         {pipeline_timeout, 120000},
-         {max_pipeline_length, 10}
+         {max_sessions, MaxSessions},
+         {max_keep_alive_length, MaxKeepAlive},
+         {pipeline_timeout, PipleLineTimeout},
+         {max_pipeline_length, MaxPipelineLength}
         ],
 
     httpc:set_options(HTTPClientOptions, PID),
 
+    %% register by this special name, so that the hook does not need to know the PID
     erlang:register( erlang:list_to_atom( "httpc_" ++ erlang:atom_to_list(?MODULE)), PID),
 
     {ok, PID}.
+
+
+start() ->
+    application:start(?MODULE).
+
+stop() ->
+    application:stop(?MODULE).
+
