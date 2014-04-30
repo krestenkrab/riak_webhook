@@ -28,7 +28,7 @@ postcommit(RObj) ->
 
     Headers = [],
 
-    Struct = riak_object_json:encode(RObj),
+    Struct = riak_object:to_json(RObj),
 
     UseStruct =
         case proplists:get_value(webhook_sendbody, Props) of
